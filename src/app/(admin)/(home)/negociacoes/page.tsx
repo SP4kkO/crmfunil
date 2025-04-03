@@ -207,7 +207,8 @@ export default function PipelinePage() {
                     (item) => item.etapa_funil_vendas === stageLabel
                   );
                   return (
-                    <Droppable droppableId={droppableId} key={droppableId}>
+                    <Droppable droppableId={droppableId} key={droppableId} isDropDisabled={false}>
+
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
