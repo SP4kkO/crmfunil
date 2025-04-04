@@ -1,22 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/modal";
 import { Negociacao } from "@/types/Negocios";
+
+interface EmpresaItem {
+  id: number;
+  nome: string;
+}
 
 interface CriarTarefaProps {
   isOpen: boolean;
   onClose: () => void;
   onNegociacaoCriada?: (negociacao: Negociacao) => void;
-  // Caso a EmpresaID seja definida externamente, você pode recebê-la via props
-  empresaID?: number;
 }
 
 export const CriarTarefa: React.FC<CriarTarefaProps> = ({
   isOpen,
   onClose,
   onNegociacaoCriada,
-  empresaID,
 }) => {
+  // Estado para o select de Empresa
+  const [selectedEmpresaID, setSelectedEmpresaID] = useState<number>(0);
+  const [empresas, setEmpresas] = useState<EmpresaItem[]>([]);
+
+  // Estados dos outros campos do formulário
   const [empresaNegociacao, setEmpresaNegociacao] = useState("");
   const [negociacao, setNegociacao] = useState("");
   const [assunto, setAssunto] = useState("");
@@ -27,11 +34,31 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
   const [horario, setHorario] = useState("");
   const [concluida, setConcluida] = useState(false);
 
+  // Busca a lista de empresas no endpoint
+  useEffect(() => {
+    async function fetchEmpresas() {
+      try {
+        const res = await fetch("http://localhost:8080/api/empresas");
+        if (res.ok) {
+          const data = await res.json();
+          setEmpresas(data);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar empresas:", error);
+      }
+    }
+    fetchEmpresas();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedEmpresaID === 0) {
+      alert("Selecione uma empresa");
+      return;
+    }
+
     const payload = {
-      // ID e NegociacaoID são gerados automaticamente
-      empresa_id: empresaID,
+      empresa_id: selectedEmpresaID,
       empresa_negociacao: empresaNegociacao,
       negociacao: negociacao,
       assunto: assunto,
@@ -46,9 +73,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
     try {
       const response = await fetch("http://localhost:8080/api/negociacoes", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -65,6 +90,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
       onClose();
 
       // Limpa os campos após o sucesso
+      setSelectedEmpresaID(0);
       setEmpresaNegociacao("");
       setNegociacao("");
       setAssunto("");
@@ -101,6 +127,26 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
             <div className="p-2">
               <h2 className="text-base font-bold mb-2">Criar Negociação</h2>
               <form onSubmit={handleSubmit}>
+                {/* Select de Empresa */}
+                <div className="mb-2">
+                  <label className="block mb-1 font-medium">Empresa</label>
+                  <select
+                    className="w-full p-1 border rounded text-xs"
+                    value={selectedEmpresaID}
+                    onChange={(e) =>
+                      setSelectedEmpresaID(Number(e.target.value))
+                    }
+                    required
+                  >
+                    <option value={0}>Selecione uma empresa</option>
+                    {empresas.map((empresa) => (
+                      <option key={empresa.id} value={empresa.id}>
+                        {empresa.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {/* Campo para Empresa Negociação */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">
                     Empresa Negociação
@@ -112,6 +158,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     onChange={(e) => setEmpresaNegociacao(e.target.value)}
                   />
                 </div>
+                {/* Campo para Negociação */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Negociação</label>
                   <input
@@ -122,6 +169,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     required
                   />
                 </div>
+                {/* Campo para Assunto */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Assunto</label>
                   <input
@@ -132,6 +180,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     required
                   />
                 </div>
+                {/* Campo para Descrição */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Descrição</label>
                   <textarea
@@ -140,6 +189,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     onChange={(e) => setDescricao(e.target.value)}
                   ></textarea>
                 </div>
+                {/* Campo para Responsável */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Responsável</label>
                   <input
@@ -150,6 +200,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     required
                   />
                 </div>
+                {/* Campo para Tipo */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Tipo</label>
                   <input
@@ -160,6 +211,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     required
                   />
                 </div>
+                {/* Campo para Data de Agendamento */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">
                     Data de Agendamento
@@ -172,6 +224,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     required
                   />
                 </div>
+                {/* Campo para Horário */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Horário</label>
                   <input
@@ -182,6 +235,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     required
                   />
                 </div>
+                {/* Checkbox para Concluída */}
                 <div className="mb-2 flex items-center">
                   <input
                     type="checkbox"
@@ -194,6 +248,7 @@ export const CriarTarefa: React.FC<CriarTarefaProps> = ({
                     Concluída
                   </label>
                 </div>
+                {/* Botões */}
                 <div className="mt-2 flex justify-end">
                   <button
                     type="button"
