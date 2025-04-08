@@ -4,13 +4,13 @@ import React, { useEffect, useState } from "react";
 import { Empresa } from "@/types/Empresa";
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
 import { FaThumbsUp, FaThumbsDown, FaPause, FaTrash } from "react-icons/fa";
-import EmpresaActionsTabs from "@/components/empresa/EmpresaTab"; // <- Suas abas
-import HistoricoEtapasTab from "@/components/historicoEtapa/tabhistorico";
+import EmpresaActionsTabs from "@/components/empresa/EmpresaTab";
+import AnotacoesTab from "@/components/anotacao/AnotacaoTabas"; // Importa a nova aba de anotações
 
 export default function PerfilEmpresa({ params }: { params: { id: string } }) {
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-
+  console.log(params.id,'hello')
   useEffect(() => {
     fetch(`http://localhost:8080/api/empresas/${params.id}`)
       .then((res) => res.json())
@@ -31,7 +31,9 @@ export default function PerfilEmpresa({ params }: { params: { id: string } }) {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">{empresa.nome}</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            {empresa.nome}
+          </h1>
           <p className="text-gray-500 dark:text-gray-300">{empresa.cnpj}</p>
         </div>
 
@@ -63,7 +65,7 @@ export default function PerfilEmpresa({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* Accordion */}
+      {/* Accordion de detalhes */}
       <div className="mt-6">
         <button
           onClick={() => setShowDetails((prev) => !prev)}
@@ -74,17 +76,54 @@ export default function PerfilEmpresa({ params }: { params: { id: string } }) {
 
         {showDetails && (
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-200">
-            <p><strong>Razão Social:</strong> {empresa.razao_social}</p>
-            <p><strong>Segmento:</strong> {empresa.segmento}</p>
-            <p><strong>Grupo:</strong> {empresa.grupo}</p>
-            <p><strong>Tamanho:</strong> {empresa.tamanho_empresa}</p>
-            <p><strong>Faturamento:</strong> {empresa.faixa_faturamento}</p>
-            <p><strong>Telefone:</strong> {empresa.telefone}</p>
-            <p><strong>Localização:</strong> {empresa.endereco}</p>
-            <p><strong>Cliente da base?</strong> {empresa.cliente_da_base ? "Sim" : "Não"}</p>
-            <p><strong>Website:</strong> <a href={empresa.url} target="_blank" className="text-blue-500 underline">{empresa.url}</a></p>
-            <p><strong>LinkedIn:</strong> <a href={empresa.linkedin_empresa} target="_blank" className="text-blue-500 underline">Perfil</a></p>
-            <p className="col-span-1 sm:col-span-2"><strong>Resumo:</strong> {empresa.resumo}</p>
+            <p>
+              <strong>Razão Social:</strong> {empresa.razao_social}
+            </p>
+            <p>
+              <strong>Segmento:</strong> {empresa.segmento}
+            </p>
+            <p>
+              <strong>Grupo:</strong> {empresa.grupo}
+            </p>
+            <p>
+              <strong>Tamanho:</strong> {empresa.tamanho_empresa}
+            </p>
+            <p>
+              <strong>Faturamento:</strong> {empresa.faixa_faturamento}
+            </p>
+            <p>
+              <strong>Telefone:</strong> {empresa.telefone}
+            </p>
+            <p>
+              <strong>Localização:</strong> {empresa.endereco}
+            </p>
+            <p>
+              <strong>Cliente da base?</strong>{" "}
+              {empresa.cliente_da_base ? "Sim" : "Não"}
+            </p>
+            <p>
+              <strong>Website:</strong>{" "}
+              <a
+                href={empresa.url}
+                target="_blank"
+                className="text-blue-500 underline"
+              >
+                {empresa.url}
+              </a>
+            </p>
+            <p className="col-span-1 sm:col-span-2">
+              <strong>LinkedIn:</strong>{" "}
+              <a
+                href={empresa.linkedin_empresa}
+                target="_blank"
+                className="text-blue-500 underline"
+              >
+                Perfil
+              </a>
+            </p>
+            <p className="col-span-1 sm:col-span-2">
+              <strong>Resumo:</strong> {empresa.resumo}
+            </p>
           </div>
         )}
       </div>
@@ -92,9 +131,8 @@ export default function PerfilEmpresa({ params }: { params: { id: string } }) {
       {/* Abas de ações */}
       <EmpresaActionsTabs />
 
-    
-<HistoricoEtapasTab />
-
+      {/* Aba de Anotações */}
+      <AnotacoesTab companyId={params.id} />
     </div>
   );
 }

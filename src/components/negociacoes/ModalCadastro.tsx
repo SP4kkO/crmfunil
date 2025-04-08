@@ -44,6 +44,8 @@ export const CriarNegociacaoModal: React.FC<CriarNegociacaoModalProps> = ({
   const [descricao, setDescricao] = useState("");
   const [responsavel, setResponsavel] = useState("");
   const [tipo, setTipo] = useState("");
+  const [funil, setFunil] = useState("");
+  const [etapaFunil, setEtapaFunil] = useState("");
   const [dataAgendamento, setDataAgendamento] = useState("");
   const [horario, setHorario] = useState("");
   const [concluida, setConcluida] = useState(false);
@@ -92,6 +94,8 @@ export const CriarNegociacaoModal: React.FC<CriarNegociacaoModalProps> = ({
       descricao: descricao,
       responsavel: responsavel,
       tipo: tipo,
+      funil: funil,
+      etapa_funil: etapaFunil,
       data_agendamento: dataAgendamento,
       horario: horario,
       concluida: concluida,
@@ -123,6 +127,8 @@ export const CriarNegociacaoModal: React.FC<CriarNegociacaoModalProps> = ({
       setDescricao("");
       setResponsavel("");
       setTipo("");
+      setFunil("");
+      setEtapaFunil("");
       setDataAgendamento("");
       setHorario("");
       setConcluida(false);
@@ -155,7 +161,7 @@ export const CriarNegociacaoModal: React.FC<CriarNegociacaoModalProps> = ({
         <div className="fixed inset-0 flex bg-opacity-5 justify-end">
           <div className="h-full w-64 overflow-y-auto text-xs slide-in bg-white bg-opacity-80 backdrop-blur-sm">
             <div className="p-2">
-              <h2 className="text-base font-bold mb-2">Criar Negociação</h2>
+              <h2 className="text-base font-bold mb-2">Criar Negociaçãoooooooooooooo</h2>
               <form onSubmit={handleSubmit}>
                 {/* Se empresaID não for definido via props, exibe o select para escolher a empresa */}
                 {!empresaID ? (
@@ -210,7 +216,7 @@ export const CriarNegociacaoModal: React.FC<CriarNegociacaoModalProps> = ({
                     ))}
                   </select>
                 </div>
-                {/* Campo para Empresa Negociação (informação adicional, se necessário) */}
+                {/* Campo para Empresa Negociação */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">
                     Empresa Negociação
@@ -272,6 +278,30 @@ export const CriarNegociacaoModal: React.FC<CriarNegociacaoModalProps> = ({
                     className="w-full p-1 border rounded text-xs"
                     value={tipo}
                     onChange={(e) => setTipo(e.target.value)}
+                    required
+                  />
+                </div>
+                {/* Campo para Funil */}
+                <div className="mb-2">
+                  <label className="block mb-1 font-medium">Funil</label>
+                  <input
+                    type="text"
+                    className="w-full p-1 border rounded text-xs"
+                    value={funil}
+                    onChange={(e) => setFunil(e.target.value)}
+                    required
+                  />
+                </div>
+                {/* Campo para Etapa de Funil */}
+                <div className="mb-2">
+                  <label className="block mb-1 font-medium">
+                    Etapa de Funil
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-1 border rounded text-xs"
+                    value={etapaFunil}
+                    onChange={(e) => setEtapaFunil(e.target.value)}
                     required
                   />
                 </div>

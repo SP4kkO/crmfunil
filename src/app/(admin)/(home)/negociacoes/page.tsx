@@ -42,6 +42,7 @@ export default function PipelinePage() {
     "columns" | "rows"
   >("columns");
   const [showContatoModal, setShowContatoModal] = useState(false);
+  const [showClienteModal, setShowClienteModal] = useState(false);
   const [showCriarModal, setShowCriarModal] = useState(false);
   const [showCriarTarefaModal, setShowCriarTarefaModal] = useState(false);
   const [showCriarClienteModal, setShowCriarClienteModal] = useState(false);
@@ -147,6 +148,15 @@ export default function PipelinePage() {
           </button>
           {plusDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md z-50">
+                           <button
+                onClick={() => {
+                  setShowClienteModal(true);
+                  setPlusDropdownOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+              >
+                Criar Cliente
+              </button>
               <button
                 onClick={() => {
                   setShowContatoModal(true);
@@ -260,8 +270,8 @@ export default function PipelinePage() {
         onNegociacaoCriada={() => {}}
       />
       <CriarClienteModal
-        isOpen={showCriarClienteModal}
-        onClose={() => setShowCriarClienteModal(false)}
+        isOpen={showClienteModal}
+        onClose={() => setShowClienteModal(false)}
         onClienteCriado={() => {}}
       />
       <CriarTarefa
