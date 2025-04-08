@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { CriarTarefaModal } from "@/components/tarefa/CriarTarefaModal";
+import CriarTarefaModal from "../tarefa/CriarTarefaModal";
 
 type Props = {
   id: string;

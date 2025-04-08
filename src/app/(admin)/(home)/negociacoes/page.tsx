@@ -14,13 +14,13 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CriarNegociacaoModal } from "@/components/negociacoes/ModalCadastro";
+import CriarNegociacaoModal from "@/components/negociacoes/ModalCadastro";
 import { CriarClienteModal } from "@/components/clientes/ModalCadastroCliente";
-import { CriarTarefa } from "@/components/tarefa/ModaCadastroTarefa";
+import CriarTarefaModal from "@/components/tarefa/CriarTarefaModal";
 import DroppableColumn from "@/components/funil/DroppableColumn";
 import DraggableCard from "@/components/funil/DraggableCard";
 import { CriarEmpresaModal } from "@/components/empresa/ModalCriaEmpresa";
-import { CriarTarefaModal } from "@/components/tarefa/CriarTarefaModal";
+
 import { CadastroModalContato } from "@/components/contato/CriarContatoModal";
 const stageMap: { [key: string]: string } = {
   lead_mapeado: "Lead mapeado",
@@ -45,13 +45,8 @@ export default function PipelinePage() {
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [showCriarModal, setShowCriarModal] = useState(false);
   const [showCriarTarefaModal, setShowCriarTarefaModal] = useState(false);
-  const [showCriarClienteModal, setShowCriarClienteModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedNegocio, setSelectedNegocio] = useState<Negociacao | null>(
-    null
-  );
-  const [showCriarTarefaModal2, setShowCriarTarefaModal2] =
-    useState<boolean>(false);
+
   const [plusDropdownOpen, setPlusDropdownOpen] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -59,9 +54,13 @@ export default function PipelinePage() {
   useEffect(() => {
     fetch("http://localhost:8080/api/negociacoes")
       .then((res) => res.json())
-      .then((data) => setNegocios(data))
+      .then((data) => {
+        console.log("Negociações recebidas:", data);
+        setNegocios(data);
+      })
       .catch((err) => console.error("Erro ao buscar negociações:", err));
   }, []);
+  
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -148,7 +147,7 @@ export default function PipelinePage() {
           </button>
           {plusDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md z-50">
-                           <button
+              <button
                 onClick={() => {
                   setShowClienteModal(true);
                   setPlusDropdownOpen(false);
@@ -229,34 +228,22 @@ export default function PipelinePage() {
                   id={droppableId}
                   label={stageLabel}
                 >
-                 <SortableContext
-  items={items.map((i) => i.id.toString())}
-  strategy={verticalListSortingStrategy}
->
-  {items.map((item) => (
-    <div key={item.id} className="relative">
-      <DraggableCard
-        id={item.id.toString()}
-        label={item.nome_negociacao}
-        tarefa={item.tarefa}
-      />
-      {/* Botão posicionado apenas no canto inferior direito */}
-      <div className="absolute bottom-2 right-2" style={{ zIndex: 1000 }}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); // Impede que o clique no botão inicie o drag
-            setShowCriarTarefaModal2(true);
-          }}
-          style={{ zIndex: 10000 }}
-          className="px-2 py-1 bg-blue-600 text-white rounded text-xs"
-        >
-          + Tarefa
-        </button>
-      </div>
-    </div>
-  ))}
-</SortableContext>
+                  <SortableContext
+                    items={items.map((i) => i.id.toString())}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {items.map((item) => (
+                      <div key={item.id} className="relative">
+                        <DraggableCard
+                          id={item.id.toString()}
+                          label={item.nome_negociacao}
+                          tarefa={item.tarefa}
+                        />
+                        {/* Botão posicionado apenas no canto inferior direito */}
 
+                      </div>
+                    ))}
+                  </SortableContext>
                 </DroppableColumn>
               );
             })}
@@ -274,7 +261,7 @@ export default function PipelinePage() {
         onClose={() => setShowClienteModal(false)}
         onClienteCriado={() => {}}
       />
-      <CriarTarefa
+      <CriarTarefaModal
         isOpen={showCriarTarefaModal}
         onClose={() => setShowCriarTarefaModal(false)}
       />
@@ -283,18 +270,7 @@ export default function PipelinePage() {
         onClose={() => setModalOpen(false)}
         onEmpresaCriada={(empresa) => console.log("Empresa criada:", empresa)}
       />
-      <CriarTarefaModal
-        isOpen={showCriarTarefaModal2}
-        onClose={() => setShowCriarTarefaModal2(false)}
-        onTarefaCriada={(tarefa) => {
-          console.log("Tarefa criada:", tarefa);
-          // Se desejar, atualize aqui a lista de tarefas/negociações
-        }}
-        // Caso selectedNegocio esteja definido, passamos seus dados para pré-definir os campos
-        empresaID={selectedNegocio?.empresa_id ?? 0}
-        empresaNome={selectedNegocio?.empresa?.nome ?? "Empresa sem nome"}
-        negociacaoID={selectedNegocio?.id ?? 0}
-      />
+
       <CadastroModalContato
         isOpen={showContatoModal}
         onClose={() => setShowContatoModal(false)}
