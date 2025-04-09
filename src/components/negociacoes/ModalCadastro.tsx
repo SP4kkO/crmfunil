@@ -12,7 +12,6 @@ type NegociacaoPayload = {
   campanha: string;
   seguradora_atual: string;
   data_vencimento_apolice: string; // formato: YYYY-MM-DD
-
 };
 
 type Empresa = {
@@ -31,6 +30,21 @@ type CriarNegociacaoModalProps = {
   onNegociacaoCriada?: (negociacao: unknown) => void;
 };
 
+// Mapeamento de opções para Etapa Funil Vendas
+const etapasOptions: { [key: string]: string } = {
+  "Lead mapeado": "Lead mapeado",
+  "Lead com data de retomada": "Lead com data de retomada",
+  "Visita/Reunião": "Visita/Reunião",
+  "Adgo info QAR": "Adgo info QAR",
+  "Em cotacao": "Em cotacao",
+  "Proposta": "Proposta",
+  "Reuniao de fechamento": "Reuniao de fechamento",
+  "Assinatura de proposta": "Assinatura de proposta",
+  "Pedido permitido": "Pedido permitido",
+  "Pedidos 2025": "Pedidos 2025",
+  "Pedidos mapeados": "Pedidos mapeados",
+};
+
 export default function CriarNegociacaoModal({
   isOpen,
   onClose,
@@ -42,14 +56,15 @@ export default function CriarNegociacaoModal({
   const [selectedContatoID, setSelectedContatoID] = useState<number>(0);
 
   const [nomeNegociacao, setNomeNegociacao] = useState<string>("");
-  const [funilVendas, setFunilVendas] = useState<string>("");
+  // Inicializa funilVendas com "GS" como padrão
+  const [funilVendas, setFunilVendas] = useState<string>("GS");
+  // Alterado para receber o valor do select
   const [etapaFunilVendas, setEtapaFunilVendas] = useState<string>("");
   const [fonte, setFonte] = useState<string>("");
   const [campanha, setCampanha] = useState<string>("");
   const [seguradoraAtual, setSeguradoraAtual] = useState<string>("");
   const [dataVencimentoApolice, setDataVencimentoApolice] =
     useState<string>("");
-
 
   // Busca empresas e contatos ao montar o componente
   useEffect(() => {
@@ -82,7 +97,6 @@ export default function CriarNegociacaoModal({
       campanha: campanha,
       seguradora_atual: seguradoraAtual,
       data_vencimento_apolice: formatDateTime(dataVencimentoApolice),
-
     };
 
     try {
@@ -181,7 +195,7 @@ export default function CriarNegociacaoModal({
                     required
                   />
                 </div>
-                {/* Funil Vendas */}
+                {/* Funil Vendas com valor padrão "GS" */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Funil Vendas</label>
                   <input
@@ -192,18 +206,24 @@ export default function CriarNegociacaoModal({
                     required
                   />
                 </div>
-                {/* Etapa Funil Vendas */}
+                {/* Etapa Funil Vendas como select */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">
                     Etapa Funil Vendas
                   </label>
-                  <input
-                    type="text"
+                  <select
                     className="w-full p-1 border rounded text-xs"
                     value={etapaFunilVendas}
                     onChange={(e) => setEtapaFunilVendas(e.target.value)}
                     required
-                  />
+                  >
+                    <option value="">Selecione uma etapa</option>
+                    {Object.entries(etapasOptions).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 {/* Fonte */}
                 <div className="mb-2">
@@ -249,11 +269,12 @@ export default function CriarNegociacaoModal({
                     type="datetime-local"
                     className="w-full p-1 border rounded text-xs"
                     value={dataVencimentoApolice}
-                    onChange={(e) => setDataVencimentoApolice(e.target.value)}
+                    onChange={(e) =>
+                      setDataVencimentoApolice(e.target.value)
+                    }
                     required
                   />
                 </div>
-               
                 {/* Botões */}
                 <div className="mt-2 flex justify-end">
                   <button
