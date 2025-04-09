@@ -51,7 +51,7 @@ export const CriarClienteModal: React.FC<CriarClienteModalProps> = ({
         onClienteCriado(novoCliente);
       }
       onClose();
-
+      window.location.reload()
       // Limpa os campos após criação com sucesso
       setNome("");
       setCnpj("");

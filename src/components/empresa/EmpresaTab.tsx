@@ -59,6 +59,7 @@ export default function EmpresaActionsTabs() {
         message: "Negociação (anotação) criada!",
       });
       setNegociacao("");
+      window.location.reload()
     } catch (error: any) {
       setAlert({
         variant: "error",

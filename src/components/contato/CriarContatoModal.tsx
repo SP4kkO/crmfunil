@@ -74,7 +74,7 @@ export const CadastroModalContato: React.FC<CriarContatoModalProps> = ({
         onContatoCriado(novoContato);
       }
       onClose();
-
+      window.location.reload()
       // Limpa os campos
       setClienteID(0);
       setNome("");

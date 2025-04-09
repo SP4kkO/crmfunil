@@ -114,6 +114,8 @@ export default function CriarNegociacaoModal({
           onNegociacaoCriada(negociacao);
         }
         onClose();
+        window.location.reload()
+        
       } else {
         console.error("Erro ao criar negociação", res.statusText);
       }
