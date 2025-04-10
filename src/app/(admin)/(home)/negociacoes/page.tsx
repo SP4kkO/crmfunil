@@ -20,8 +20,9 @@ import CriarTarefaModal from "@/components/tarefa/CriarTarefaModal";
 import DroppableColumn from "@/components/funil/DroppableColumn";
 import DraggableCard from "@/components/funil/DraggableCard";
 import { CriarEmpresaModal } from "@/components/empresa/ModalCriaEmpresa";
-
 import { CadastroModalContato } from "@/components/contato/CriarContatoModal";
+import { useRouter } from "next/navigation"; // ou "next/navigation" caso esteja usando a nova abordagem
+
 const stageMap: { [key: string]: string } = {
   lead_mapeado: "Lead mapeado",
   lead_retomada: "Lead com data de retomada",
@@ -38,16 +39,15 @@ const stageMap: { [key: string]: string } = {
 
 export default function PipelinePage() {
   const [negocios, setNegocios] = useState<Negociacao[]>([]);
-  const [layoutOrientation, setLayoutOrientation] = useState<
-    "columns" | "rows"
-  >("columns");
+  const [layoutOrientation, setLayoutOrientation] = useState<"columns" | "rows">("columns");
   const [showContatoModal, setShowContatoModal] = useState(false);
   const [showClienteModal, setShowClienteModal] = useState(false);
   const [showCriarModal, setShowCriarModal] = useState(false);
   const [showCriarTarefaModal, setShowCriarTarefaModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-
   const [plusDropdownOpen, setPlusDropdownOpen] = useState(false);
+
+  const router = useRouter(); // Hook para navegação
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -60,7 +60,6 @@ export default function PipelinePage() {
       })
       .catch((err) => console.error("Erro ao buscar negociações:", err));
   }, []);
-  
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -89,16 +88,14 @@ export default function PipelinePage() {
   };
 
   return (
-    <div className="dark:bg-gray-900 ">
+    <div className="dark:bg-gray-900">
       <PageBreadcrumb pageTitle="Funil de Vendas" />
 
       <div className="flex justify-between items-center p-4 container">
         {/* Botão de layout com ícone */}
         <button
           onClick={() =>
-            setLayoutOrientation((prev) =>
-              prev === "columns" ? "rows" : "columns"
-            )
+            setLayoutOrientation((prev) => (prev === "columns" ? "rows" : "columns"))
           }
           className="p-2 bg-gray-200 rounded hover:bg-gray-300 transition"
           title="Alternar visualização"
@@ -203,21 +200,9 @@ export default function PipelinePage() {
         onDragEnd={handleDragEnd}
       >
         {/* CONTAINER EXTERNO: limita largura da tela e aplica scroll */}
-        <div
-          className={`w-full ${
-            layoutOrientation === "columns"
-              ? "overflow-x-auto"
-              : "overflow-y-auto"
-          }`}
-        >
-          {/* CONTAINER INTERNO: colunas expansíveis apenas em modo 'columns' */}
-          <div
-            className={`gap-4 px-4 flex ${
-              layoutOrientation === "columns"
-                ? "flex-row w-fit"
-                : "flex-col w-full"
-            }`}
-          >
+        <div className="w-full overflow-auto">
+          {/* CONTAINER INTERNO: utilizando "w-full" para que as colunas ocupem o máximo da tela */}
+          <div className={`gap-4 px-4 flex ${layoutOrientation === "columns" ? "flex-row w-full" : "flex-col w-full"}`}>
             {Object.entries(stageMap).map(([droppableId, stageLabel]) => {
               const items = negocios.filter(
                 (n) => n.etapa_funil_vendas === stageLabel
@@ -227,20 +212,25 @@ export default function PipelinePage() {
                   key={droppableId}
                   id={droppableId}
                   label={stageLabel}
+                  // Você pode garantir que cada coluna ocupe o máximo da largura utilizando classes específicas aqui
+                  className="w-full" 
                 >
                   <SortableContext
                     items={items.map((i) => i.id.toString())}
                     strategy={verticalListSortingStrategy}
                   >
                     {items.map((item) => (
-                      <div key={item.id} className="relative">
+                      <div
+                        key={item.id}
+                        className="relative cursor-pointer"
+                        // Adiciona onClick para redirecionar ao clicar no card
+                        onClick={() => router.push(`/negociacoes/${item.id}`)}
+                      >
                         <DraggableCard
                           id={item.id.toString()}
                           label={item.nome_negociacao}
                           tarefa={item.tarefa}
                         />
-                        {/* Botão posicionado apenas no canto inferior direito */}
-
                       </div>
                     ))}
                   </SortableContext>
@@ -270,7 +260,6 @@ export default function PipelinePage() {
         onClose={() => setModalOpen(false)}
         onEmpresaCriada={(empresa) => console.log("Empresa criada:", empresa)}
       />
-
       <CadastroModalContato
         isOpen={showContatoModal}
         onClose={() => setShowContatoModal(false)}

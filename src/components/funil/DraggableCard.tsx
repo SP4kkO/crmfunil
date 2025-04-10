@@ -44,6 +44,7 @@ export default function DraggableCard({ id, label, tarefa }: Props) {
           onClick={(e) => {
             e.stopPropagation(); // Impede que o clique no botão inicie o drag
             setModalOpen(true);
+            console.log('helo')
           }}
           className="mt-2 px-2 py-1 bg-blue-600 text-white rounded text-xs"
         >

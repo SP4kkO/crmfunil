@@ -1,16 +1,44 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { Empresa } from "@/types/Empresa";
 import { Tooltip } from "@/components/ui/tooltip/Tooltip";
 import { FaThumbsUp, FaThumbsDown, FaPause, FaTrash } from "react-icons/fa";
 import EmpresaActionsTabs from "@/components/empresa/EmpresaTab";
-import AnotacoesTab from "@/components/anotacao/AnotacaoTabas"; // Importa a nova aba de anotações
+import AnotacoesTab from "@/components/anotacao/AnotacaoTabas"; // Importa a aba de anotações
 
-export default function PerfilEmpresa({ params }: { params: { id: string } }) {
+export default function PerfilEmpresa() {
+  const params = useParams(); // Agora params é resolvido automaticamente
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  console.log(params.id,'hello')
+
+  console.log(params.id, "hello");
+
+  // Função para atualizar o status da empresa
+  const updateStatus = async (newStatus: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/empresas/${params.id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar o status");
+      }
+      const updatedEmpresa = await response.json();
+      setEmpresa(updatedEmpresa);
+    } catch (error) {
+      console.error(error);
+      // Trate o erro aqui (ex: notificação para o usuário)
+    }
+  };
+
   useEffect(() => {
     fetch(`http://localhost:8080/api/empresas/${params.id}`)
       .then((res) => res.json())
@@ -24,7 +52,8 @@ export default function PerfilEmpresa({ params }: { params: { id: string } }) {
       );
   }, [params.id]);
 
-  if (!empresa) return <p className="text-center mt-10">Carregando empresa...</p>;
+  if (!empresa)
+    return <p className="text-center mt-10">Carregando empresa...</p>;
 
   return (
     <div className="p-8 max-w-5xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-md">
@@ -34,25 +63,34 @@ export default function PerfilEmpresa({ params }: { params: { id: string } }) {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
             {empresa.nome}
           </h1>
-          <p className="text-gray-500 dark:text-gray-300">{empresa.cnpj}</p>
+          <p className="text-gray-500 dark:text-gray-300">{empresa.cnpj_matriz}</p>
         </div>
 
         {/* Botões de ação com Tooltip */}
         <div className="flex items-center gap-3">
           <Tooltip content="Marcar como ganho" position="top">
-            <button className="p-2 bg-green-100 text-green-600 rounded-full hover:bg-green-200">
+            <button
+              onClick={() => updateStatus("ganho")}
+              className="p-2 bg-green-100 text-green-600 rounded-full hover:bg-green-200"
+            >
               <FaThumbsUp />
             </button>
           </Tooltip>
 
           <Tooltip content="Marcar como perda" position="top">
-            <button className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200">
+            <button
+              onClick={() => updateStatus("perdida")}
+              className="p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200"
+            >
               <FaThumbsDown />
             </button>
           </Tooltip>
 
           <Tooltip content="Pausar negociação" position="top">
-            <button className="p-2 bg-yellow-100 text-yellow-600 rounded-full hover:bg-yellow-200">
+            <button
+              onClick={() => updateStatus("pausada")}
+              className="p-2 bg-yellow-100 text-yellow-600 rounded-full hover:bg-yellow-200"
+            >
               <FaPause />
             </button>
           </Tooltip>
@@ -92,10 +130,10 @@ export default function PerfilEmpresa({ params }: { params: { id: string } }) {
               <strong>Faturamento:</strong> {empresa.faixa_faturamento}
             </p>
             <p>
-              <strong>Telefone:</strong> {empresa.telefone}
+              <strong>Telefone:</strong> {empresa.tamanho_empresa}
             </p>
             <p>
-              <strong>Localização:</strong> {empresa.endereco}
+              <strong>Localização:</strong> {empresa.estado}
             </p>
             <p>
               <strong>Cliente da base?</strong>{" "}
