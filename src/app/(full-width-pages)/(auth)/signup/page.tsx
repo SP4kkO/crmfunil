@@ -1,12 +1,12 @@
-import SignUpForm from "@/components/auth/SignUpForm";
-import GridShape from "@/components/common/GridShape";
-import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
+import SignUpForm from '@/components/auth/SignUpForm';
+import GridShape from '@/components/common/GridShape';
+import { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Next.js SignUp Page | TailAdmin - Next.js Dashboard Template",
-  description: "This is Next.js SignUp Page TailAdmin Dashboard Template",
+  title: 'Next.js SignUp Page | TailAdmin - Next.js Dashboard Template',
+  description: 'This is Next.js SignUp Page TailAdmin Dashboard Template',
   // other metadata
 };
 
@@ -21,7 +21,7 @@ export default function SignUp() {
         <div className="flex flex-col items-center max-w-xs">
           <Link href="" className="block mb-4">
             <Image
-              src="/images/logo/auth-logo.svg"
+              src="/images/logo/galamba.png"
               width={231}
               height={48}
               alt="Logo"

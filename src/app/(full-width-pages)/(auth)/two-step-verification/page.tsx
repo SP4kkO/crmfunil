@@ -24,7 +24,7 @@ export default function OtpVerification() {
             <Image
               width={231}
               height={48}
-              src="/images/logo/auth-logo.svg"
+              src="/images/logo/galamba.png"
               alt="Logo"
             />
           </Link>

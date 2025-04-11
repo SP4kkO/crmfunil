@@ -1,14 +1,14 @@
-import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
-import GridShape from "@/components/common/GridShape";
-import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
+import GridShape from '@/components/common/GridShape';
+import { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
 
 export const metadata: Metadata = {
-  title: "Next.js Reset Password | TailAdmin - Next.js Dashboard Template",
+  title: 'Next.js Reset Password | TailAdmin - Next.js Dashboard Template',
   description:
-    "This is Next.js Password Reset page for TailAdmin Dashboard Template",
+    'This is Next.js Password Reset page for TailAdmin Dashboard Template',
   // other metadata
 };
 
@@ -25,7 +25,7 @@ export default function ResetPasswordPage() {
             <Image
               width={231}
               height={48}
-              src="/images/logo/auth-logo.svg"
+              src="/images/logo/galamba.png"
               alt="Logo"
             />
           </Link>
