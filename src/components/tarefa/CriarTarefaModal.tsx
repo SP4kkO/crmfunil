@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, FormEvent } from "react";
 import { Modal } from "@/components/ui/modal";
 
 type Empresa = {
@@ -7,23 +8,28 @@ type Empresa = {
   nome: string;
 };
 
-// Note que, no payload, mesmo que a interface do componente use "Tarefa" para o label,
-// o backend espera o campo "negociacao".
+type Negociacao = {
+  id: number;
+  nome_negociacao: string;  // corresponde ao JSON "nome_negociacao"
+};
+
 type CriarTarefaPayload = {
+  negociacao_id: number;
   empresa_id: number;
-  negociacao: string; // <-- Campo obrigatório que representa a tarefa/negociação
+  negociacao: string;
   assunto: string;
   descricao?: string;
   responsavel: string;
   tipo: string;
-  data_agendamento: string; // Formato "YYYY-MM-DDT00:00:00Z"
-  horario: string; // Ex: "HH:MM"
+  data_agendamento: string; // "YYYY-MM-DDT00:00:00Z"
+  horario: string;          // "HH:MM"
+  concluida: boolean;
 };
 
 type CriarTarefaModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onTarefaCriada?: (tarefa: unknown) => void;
+  onTarefaCriada?: (tarefa: any) => void;
 };
 
 export default function CriarTarefaModal({
@@ -32,41 +38,56 @@ export default function CriarTarefaModal({
   onTarefaCriada,
 }: CriarTarefaModalProps) {
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [negociacoes, setNegociacoes] = useState<Negociacao[]>([]);
   const [selectedEmpresaID, setSelectedEmpresaID] = useState<number>(0);
-  const [tarefa, setTarefa] = useState<string>(""); // Aqui o usuário insere o nome da tarefa
+  const [selectedNegociacaoID, setSelectedNegociacaoID] = useState<number>(0);
   const [assunto, setAssunto] = useState<string>("");
   const [descricao, setDescricao] = useState<string>("");
   const [responsavel, setResponsavel] = useState<string>("");
   const [tipo, setTipo] = useState<string>("");
-  const [dataAgendamento, setDataAgendamento] = useState<string>(""); // "YYYY-MM-DD"
-  const [horario, setHorario] = useState<string>(""); // "HH:MM"
+  const [dataAgendamento, setDataAgendamento] = useState<string>("");
+  const [horario, setHorario] = useState<string>("");
 
-  // Busca as empresas via endpoint
+  // ─── Carrega lista de empresas ───────────────────────────────
   useEffect(() => {
     fetch("http://localhost:8080/api/empresas")
       .then((res) => res.json())
       .then((data: Empresa[]) => setEmpresas(data))
-      .catch((error) => console.error("Erro ao buscar empresas:", error));
+      .catch((err) => console.error("Erro ao buscar empresas:", err));
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // ─── Carrega lista de negociações ────────────────────────────
+  useEffect(() => {
+    fetch("http://localhost:8080/api/negociacoes")
+      .then((res) => res.json())
+      .then((data: Negociacao[]) => setNegociacoes(data))
+      .catch((err) => console.error("Erro ao buscar negociações:", err));
+  }, []);
+
+  // ─── Envio do formulário ─────────────────────────────────────
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Formata a data para incluir horário padrão (T00:00:00Z)
-    const dataAgendamentoFormatted = dataAgendamento
-      ? `${dataAgendamento}T00:00:00Z`
-      : "";
+    // encontra o nome da negociação selecionada
+    const negociacaoSelecionada = negociacoes.find(
+      (n) => n.id === selectedNegociacaoID
+    );
 
     const payload: CriarTarefaPayload = {
+      negociacao_id: selectedNegociacaoID,
       empresa_id: selectedEmpresaID,
-      // Observe que mapeamos o valor digitado no campo "Tarefa" para a propriedade "negociacao"
-      negociacao: tarefa,
-      assunto: assunto,
+      negociacao: negociacaoSelecionada
+        ? negociacaoSelecionada.nome_negociacao
+        : "",
+      assunto,
       descricao: descricao || undefined,
-      responsavel: responsavel,
-      tipo: tipo,
-      data_agendamento: dataAgendamentoFormatted,
-      horario: horario,
+      responsavel,
+      tipo,
+      data_agendamento: dataAgendamento
+        ? `${dataAgendamento}T00:00:00Z`
+        : "",
+      horario,
+      concluida: false, // sempre começar como não concluída
     };
 
     try {
@@ -75,23 +96,18 @@ export default function CriarTarefaModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (res.ok) {
-        const novaTarefa = await res.json();
-        if (onTarefaCriada) {
-          onTarefaCriada(novaTarefa);
-        }
-        onClose();
-      } else {
-        console.error("Erro ao criar tarefa:", res.statusText);
-      }
-    } catch (error) {
-      console.error("Erro na requisição de criação:", error);
+      if (!res.ok) throw new Error(res.statusText);
+      const novaTarefa = await res.json();
+      onTarefaCriada?.(novaTarefa);
+      onClose();
+    } catch (err) {
+      console.error("Erro ao criar tarefa:", err);
     }
   };
 
   return (
     <>
-      {/* Animação slide-in da direita para a esquerda */}
+      {/* Animação slide-in */}
       <style jsx>{`
         @keyframes slideInRight {
           from {
@@ -105,13 +121,14 @@ export default function CriarTarefaModal({
           animation: slideInRight 0.5s ease-out;
         }
       `}</style>
+
       <Modal isOpen={isOpen} onClose={onClose} className="p-0">
         <div className="fixed inset-0 flex bg-opacity-5 justify-end">
           <div className="h-full w-80 overflow-y-auto text-xs slide-in bg-white bg-opacity-80 backdrop-blur-sm">
             <div className="p-2">
               <h2 className="text-base font-bold mb-2">Criar Tarefa</h2>
               <form onSubmit={handleSubmit}>
-                {/* Select para Escolher Empresa */}
+                {/* Empresa */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Empresa</label>
                   <select
@@ -122,26 +139,40 @@ export default function CriarTarefaModal({
                     }
                     required
                   >
-                    <option value={0}>Selecione uma empresa</option>
-                    {empresas.map((empresa) => (
-                      <option key={empresa.id} value={empresa.id}>
-                        {empresa.nome}
+                    <option value={0} disabled>
+                      Selecione uma empresa
+                    </option>
+                    {empresas.map((emp) => (
+                      <option key={emp.id} value={emp.id}>
+                        {emp.nome}
                       </option>
                     ))}
                   </select>
                 </div>
-                {/* Campo Tarefa (será mapeado para "negociacao") */}
+
+                {/* Negociação */}
                 <div className="mb-2">
-                  <label className="block mb-1 font-medium">Tarefa</label>
-                  <input
-                    type="text"
+                  <label className="block mb-1 font-medium">Negociação</label>
+                  <select
                     className="w-full p-1 border rounded text-xs"
-                    value={tarefa}
-                    onChange={(e) => setTarefa(e.target.value)}
+                    value={selectedNegociacaoID}
+                    onChange={(e) =>
+                      setSelectedNegociacaoID(Number(e.target.value))
+                    }
                     required
-                  />
+                  >
+                    <option value={0} disabled>
+                      Selecione uma negociação
+                    </option>
+                    {negociacoes.map((neg) => (
+                      <option key={neg.id} value={neg.id}>
+                        {neg.nome_negociacao}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                {/* Campo Assunto */}
+
+                {/* Assunto */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Assunto</label>
                   <input
@@ -152,18 +183,24 @@ export default function CriarTarefaModal({
                     required
                   />
                 </div>
-                {/* Campo Descrição (opcional) */}
+
+                {/* Descrição */}
                 <div className="mb-2">
-                  <label className="block mb-1 font-medium">Descrição</label>
+                  <label className="block mb-1 font-medium">
+                    Descrição
+                  </label>
                   <textarea
                     className="w-full p-1 border rounded text-xs"
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
                   />
                 </div>
-                {/* Campo Responsável */}
+
+                {/* Responsável */}
                 <div className="mb-2">
-                  <label className="block mb-1 font-medium">Responsável</label>
+                  <label className="block mb-1 font-medium">
+                    Responsável
+                  </label>
                   <input
                     type="text"
                     className="w-full p-1 border rounded text-xs"
@@ -172,7 +209,8 @@ export default function CriarTarefaModal({
                     required
                   />
                 </div>
-                {/* Campo Tipo */}
+
+                {/* Tipo */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Tipo</label>
                   <input
@@ -183,7 +221,8 @@ export default function CriarTarefaModal({
                     required
                   />
                 </div>
-                {/* Campo Data de Agendamento */}
+
+                {/* Data de Agendamento */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">
                     Data de Agendamento
@@ -196,7 +235,8 @@ export default function CriarTarefaModal({
                     required
                   />
                 </div>
-                {/* Campo Horário */}
+
+                {/* Horário */}
                 <div className="mb-2">
                   <label className="block mb-1 font-medium">Horário</label>
                   <input
@@ -207,6 +247,7 @@ export default function CriarTarefaModal({
                     required
                   />
                 </div>
+
                 {/* Botões */}
                 <div className="mt-2 flex justify-end">
                   <button

@@ -55,7 +55,7 @@ export const CriarEmpresaModal: React.FC<CriarEmpresaModalProps> = ({
     cliente_id: 0,
     linkedin_empresa: "",
     grupo: "",
-    anotacoes: [],
+    
   });
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -349,16 +349,7 @@ export const CriarEmpresaModal: React.FC<CriarEmpresaModalProps> = ({
                     onChange={handleChange}
                   />
                 </div>
-                <div className="mb-2">
-                  <label className="block mb-1 font-medium">Anotações</label>
-                  <textarea
-                    name="anotacoes"
-                    className="w-full p-1 border rounded text-xs"
-                    value={empresa.anotacoes.join("\n")}
-                    onChange={handleAnotacoesChange}
-                    placeholder="Uma anotação por linha"
-                  />
-                </div>
+
                 <div className="mt-2 flex justify-end">
                   <button
                     type="button"
